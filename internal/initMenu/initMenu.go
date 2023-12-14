@@ -11,6 +11,7 @@ import (
 
 type toggleAddMenu struct{}
 type toggleDelMenu struct{}
+type toggleBackMenu struct{}
 
 type InitMenu struct {
 }
@@ -18,7 +19,7 @@ type InitMenu struct {
 var backMenu load.LoadMenu
 
 func (m InitMenu) Load(l load.LoadMenu) tea.Model {
-	me := menu{
+	return menu{
 		options: []menuItem{
 			{
 				text:    "Add Something",
@@ -28,24 +29,13 @@ func (m InitMenu) Load(l load.LoadMenu) tea.Model {
 				text:    "Delete Something",
 				onPress: func() tea.Msg { return toggleDelMenu{} },
 			},
-		},
-	}
-
-	s := "Exit"
-	if l != nil {
-		backMenu = l
-		s = "Go Back."
-	}
-
-	me.options = append(me.options, menuItem{
-		text: s,
-		onPress: func() tea.Msg {
-			return struct{}{}
-		},
-	})
-
-	return me
-
+			{
+				text: "Exit.",
+				onPress: func() tea.Msg {
+					return toggleBackMenu{}
+				},
+			},
+		}}
 }
 
 type menuItem struct {
@@ -64,6 +54,8 @@ func (m menu) Init() tea.Cmd {
 
 func (m menu) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg.(type) {
+	case toggleBackMenu:
+		return m, tea.Quit
 	case toggleDelMenu:
 		return m.toggleDelMenu(), nil
 	case tea.KeyMsg:
@@ -112,5 +104,5 @@ func (m menu) View() string {
 
 func (m menu) toggleDelMenu() tea.Model {
 	d := deletemenu.DelMenu{}
-	return d.Load()
+	return d.Load(InitMenu{})
 }

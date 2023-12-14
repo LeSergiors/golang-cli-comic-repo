@@ -1,16 +1,21 @@
 package deletemenu
 
 import (
+	"comic-cli/internal/load"
 	"fmt"
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
 
+type toggleBackMenu struct{}
+
 type DelMenu struct{}
 
-func (d DelMenu) Load() tea.Model {
-	return menu{
+var backMenu load.LoadMenu
+
+func (d DelMenu) Load(l load.LoadMenu) tea.Model {
+	me := menu{
 		options: []menuItem{
 			{
 				text:    "Delete Publishers",
@@ -22,6 +27,17 @@ func (d DelMenu) Load() tea.Model {
 			},
 		},
 	}
+
+	s := "Exit"
+	if l != nil {
+		s = "Go Back."
+		backMenu = l
+	}
+
+	me.options = append(me.options, menuItem{text: s, onPress: func() tea.Msg { return toggleBackMenu{} }})
+
+	return me
+
 }
 
 type menuItem struct {
@@ -40,6 +56,12 @@ func (m menu) Init() tea.Cmd {
 
 func (m menu) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg.(type) {
+	case toggleBackMenu:
+		if backMenu != nil {
+			return m.goBack(), nil
+		} else {
+			return m, tea.Quit
+		}
 	case tea.KeyMsg:
 		switch msg.(tea.KeyMsg).String() {
 		case "ctrl+c":
@@ -82,4 +104,9 @@ func (m menu) View() string {
 	return fmt.Sprintf(`%s 
 	
 	Press enter/return to select a list item, arrow kwys to move, or Ctrl+c to exit.`, strings.Join(options, "\n"))
+}
+
+func (m menu) goBack() tea.Model {
+	d := backMenu.Load(DelMenu{})
+	return d
 }
