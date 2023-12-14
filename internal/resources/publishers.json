@@ -1,0 +1,16 @@
+{
+    "publishers": [
+        {
+            "id": 1,
+            "name": "Marvel"
+        },
+        {
+            "id": 2,
+            "name": "DC Comics"
+        },
+        {
+            "id": 3,
+            "name": "Image"
+        }
+    ]
+}
